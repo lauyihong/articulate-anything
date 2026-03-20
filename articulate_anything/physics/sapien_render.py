@@ -166,7 +166,7 @@ def create_color_mappings(unique_labels, robot):
     )
 
     # Create a mapping of link IDs to link names
-    link_id_to_name = {int(link.id): link.name for link in robot.get_links()}
+    link_id_to_name = {int(link.entity.per_scene_id): link.name for link in robot.get_links()}
 
     # Create a mapping of label IDs to colors
     link_id_to_color = {
