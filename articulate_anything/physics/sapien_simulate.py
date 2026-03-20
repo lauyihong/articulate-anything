@@ -127,10 +127,10 @@ def get_manipulatable_joints(robot):
     joints = robot.get_joints()
     manipulatable_joints = []
     for i, joint in enumerate(joints):
-        if joint.type in ["revolute", "prismatic"]:
+        if joint.type in ["revolute", "revolute_unwrapped", "prismatic"]:
             limits = joint.get_limits()[0]
             if (
-                joint.type == "revolute"
+                joint.type in ["revolute", "revolute_unwrapped"]
                 and limits[0] == -float("inf")
                 and limits[1] == float("inf")
             ):
