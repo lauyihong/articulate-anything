@@ -1,6 +1,7 @@
 import numpy as np
 import sapien.core as sapien
 import cv2
+from scipy.spatial.transform import Rotation as R
 from articulate_anything.utils.utils import (
     join_path,
     save_json,
@@ -23,9 +24,6 @@ def setup_cameras(cfg, scene):
             near=0.1,
             far=100,
         )
-        camera_mount_actor = scene.create_actor_builder().build_kinematic()
-        camera.set_parent(parent=camera_mount_actor, keep_pose=False)
-
         # set the camera up at `cam_pos` and looking at `look_at`
         cam_pos = np.array(view_params.cam_pos)
         look_at = np.array(view_params.look_at)
@@ -37,8 +35,10 @@ def setup_cameras(cfg, scene):
         mat44 = np.eye(4)
         mat44[:3, :3] = np.stack([forward, left, up], axis=1)
         mat44[:3, 3] = cam_pos
-        camera_mount_actor.set_pose(
-            sapien.Pose.from_transformation_matrix(mat44))
+        rot = R.from_matrix(mat44[:3, :3])
+        quat_xyzw = rot.as_quat()  # scipy: [x, y, z, w]
+        quat_wxyz = [quat_xyzw[3], quat_xyzw[0], quat_xyzw[1], quat_xyzw[2]]
+        camera.entity.set_pose(sapien.Pose(p=cam_pos, q=quat_wxyz))
 
         cameras[view_name] = camera
 
@@ -130,7 +130,7 @@ def get_segmentation_data(camera):
     camera.take_picture()
 
     # Get the segmentation labels
-    seg_labels = camera.get_visual_actor_segmentation()
+    seg_labels = camera.get_picture("Segmentation")
 
     # Extract the label image (second channel of seg_labels)
     label_image = seg_labels[..., 1].astype(np.uint8)
@@ -221,7 +221,7 @@ def take_camera_pic(
     camera.take_picture()
     if not use_segmentation:
         # If segmentation is not used, return the regular color image
-        rgba = camera.get_float_texture("Color")
+        rgba = camera.get_picture("Color")
         rgba_img = (rgba * 255).clip(0, 255).astype("uint8")
         return cv2.cvtColor(rgba_img, cv2.COLOR_RGBA2BGR)
 

@@ -22,7 +22,10 @@ from articulate_anything.physics.sapien_render import (
     flip_video,
 )
 from typing import Any, Dict
-from sapien.asset import create_checkerboard
+try:
+    from sapien.asset import create_checkerboard
+except ImportError:
+    create_checkerboard = None
 from articulate_anything.physics.pybullet_utils import setup_pybullet
 import pybullet as p
 
@@ -82,7 +85,7 @@ def setup_sapien(cfg):
 
     loader = scene.create_urdf_loader()
     loader.fix_root_link = True
-    robot = loader.load_kinematic(cfg.urdf.file)
+    robot = loader.load(cfg.urdf.file)
     assert robot, "URDF not loaded."
 
     if cfg.urdf.raise_distance_file is None:

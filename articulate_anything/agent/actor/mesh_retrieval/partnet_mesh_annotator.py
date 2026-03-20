@@ -193,7 +193,7 @@ def step(scene, camera):
     scene.update_render()  # sync pose from SAPIEN to renderer
     camera.take_picture()
 
-    rgba = camera.get_float_texture("Color")
+    rgba = camera.get_picture("Color")
     rgba_img = (rgba * 255).clip(0, 255).astype("uint8")
     bgr_img = cv2.cvtColor(rgba_img, cv2.COLOR_RGB2BGR)
     return bgr_img
@@ -241,7 +241,7 @@ def render_partnet_views(partnet_dir, overwrite=False):
         logging.info(f"  🏗️ Loaded scene")
 
         # asset = loader.load(urdf_file)
-        asset = loader.load_kinematic(urdf_file)
+        asset = loader.load(urdf_file)
         # for link in asset.get_links():
         #     link.disable_gravity = True
 
@@ -321,7 +321,7 @@ def render_partnet_views(partnet_dir, overwrite=False):
             camera.set_pose(sapien.Pose(mat_front))
 
             # asset = loader.load(temp_urdf_path)
-            asset = loader.load_kinematic(temp_urdf_path)
+            asset = loader.load(temp_urdf_path)
             img = step(scene, camera)
             cv2.imwrite(f'{partnet_dir}/part_{link_name}.jpg', img)
             os.remove(temp_urdf_path)

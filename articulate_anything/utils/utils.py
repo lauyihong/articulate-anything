@@ -114,8 +114,8 @@ def config_to_command(cfg: DictConfig, script_path: str, conda_env: str = "artic
 def make_cmd(script_path: str, conda_env: str = "articulate-anything",
              cmd_args=[]):
     # Construct the command
+    # Use python directly from PATH instead of conda run
     command = [
-        "conda", "run", "-n", conda_env,
         "python", script_path
     ] + cmd_args
 
